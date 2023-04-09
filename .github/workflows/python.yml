@@ -2,7 +2,7 @@ name: 豆瓣北京租房小组信息爬取
 
 on:
   schedule:
-    - cron: "0 0,4,8,12,16,20 * * * Asia/Shanghai"
+    - cron: "0 0,4,8,12,16,20 * * *"
 
 jobs:
   build:
