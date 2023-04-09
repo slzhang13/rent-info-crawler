@@ -3,6 +3,19 @@
 import sqlite3
 import time
 from util import *
+from dateutil import tz
+from datetime import datetime, timedelta
+
+
+def local_time(local_tz="Asia/Shanghai"):
+
+    utc = datetime.utcnow()  # naive datetime object
+    utc = utc.replace(tzinfo=tz.gettz("UTC"))  # timezone aware datetime object
+
+    # convert time zone
+    local = utc.astimezone(tz.gettz(local_tz))
+
+    return local
 
 
 if __name__ == "__main__":
@@ -10,7 +23,7 @@ if __name__ == "__main__":
     douban_group = "beijingzufang"
 
     print("=========================================================")
-    print("开始执行，时间：", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + "\n")
+    print("开始执行，时间：", datetime.strftime(local_time(), "%Y-%m-%d %H:%M:%S") + "\n")
 
     ## 连接数据库、创建数据表
     rent_info = sqlite3.connect("rent_info.db")
@@ -29,8 +42,8 @@ if __name__ == "__main__":
     last_update = (
         cursor.fetchone()[1]
         if cursor.fetchone()
-        else time.strftime(
-            "%m-%d %H:%M", time.localtime(time.time() - 3600 * 4)
+        else datetime.strftime(
+            local_time() - timedelta(hours=4), "%m-%d %H:%M"
         )  # 当数据表是初次建立时，从4小时前开始爬取
     )
 
@@ -45,8 +58,6 @@ if __name__ == "__main__":
     for page in range(1, max_page + 1):  # 从最新页开始爬取
 
         time.sleep(5)  # 爬取不要太快，防止被封
-
-        # print(f"\t正在爬取第{page}页...")
 
         page_info = crawl_page(douban_group, page)  # 爬取一页
 
@@ -88,5 +99,5 @@ if __name__ == "__main__":
     xls_write(db_name, table_name)
 
     print("数据筛选并导出成功\n")
-    print("执行完毕，时间：", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    print("执行完毕，时间：", datetime.strftime(local_time(), "%Y-%m-%d %H:%M:%S"))
     print("=========================================================\n")
