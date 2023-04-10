@@ -39,13 +39,13 @@ if __name__ == "__main__":
     ## 读取上次执行添加的最新一条数据
     cursor = rent_info.cursor()
     cursor.execute(f"SELECT * FROM {douban_group} ORDER BY update_time DESC")
-    last_update = (
-        cursor.fetchone()[1]
-        if cursor.fetchone()
-        else datetime.strftime(
+
+    try:
+        last_update = cursor.fetchone()[1]
+    except:  # 当数据表是初次建立时，从4小时前开始爬取
+        last_update = datetime.strftime(
             local_time() - timedelta(hours=4), "%m-%d %H:%M"
-        )  # 当数据表是初次建立时，从4小时前开始爬取
-    )
+        )
 
     ## 一直爬取到上次执行时的最新更新时间
     max_page = 20  # 每次爬取的最大页数（6h执行一次，20页足够包含6h内的更新）
