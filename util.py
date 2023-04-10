@@ -62,8 +62,8 @@ def xls_write(db_name, table_name):
     worksheet = workbook.add_worksheet("sheet1")
     worksheet.activate()
     # 按照实际格式调整
-    worksheet.set_column("A:A", 60)
-    worksheet.set_column("B:B", 30)
+    worksheet.set_column("A:A", 75)
+    worksheet.set_column("B:B", 15)
     worksheet.set_column("C:C", 50)
     sheet_title = ["标题", "最新回复时间", "链接"]
 
