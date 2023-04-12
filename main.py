@@ -18,6 +18,30 @@ def local_time(local_tz="Asia/Shanghai"):
     return local
 
 
+# 将添加/更新数据项提取为函数
+def add_item(cursor, table_name, item):
+    num = 0
+    # 根据link查询当前信息是否已经存在，存在且有新回复则更新，不存在则插入
+    cursor.execute(f"SELECT * FROM {table_name} WHERE link=?", (item[2],))
+    row = cursor.fetchone()
+    if row:  # 存在则更新
+        if row[1] < item[1]:  # 有新回复
+            cursor.execute(
+                f"UPDATE {table_name} SET title=?, update_time=? WHERE link=?",
+                (item[0], item[1], item[2]),
+            )
+            num = 1  # 本次更新/添加了一条数据
+        else:  # 无新回复
+            num = 0  # 本次没有更新/添加数据
+    else:  # 不存在则插入
+        cursor.execute(
+            f"INSERT INTO {table_name} VALUES (?, ?, ?)",
+            (item[0], item[1], item[2]),
+        )
+        num = 1  # 本次更新/添加了一条数据
+    return num
+
+
 if __name__ == "__main__":
 
     douban_group = "beijingzufang"
@@ -48,10 +72,9 @@ if __name__ == "__main__":
         )
 
     ## 一直爬取到上次执行时的最新更新时间
-    max_page = 20  # 每次爬取的最大页数（6h执行一次，20页足够包含6h内的更新）
-    exit_flag = False
-    latest_update = -1
-    num = 0
+    max_page = 20  # 每次爬取的最大页数（4h执行一次，20页足够包含4h内的更新）
+    latest_update = ""
+    item_num = 0
 
     print("开始爬取...")
 
@@ -61,42 +84,26 @@ if __name__ == "__main__":
 
         page_info = crawl_page(douban_group, page)  # 爬取一页
 
-        if page == 1:
-            latest_update = page_info[0][1]
+        item_num_cur_page = 0  # 当前页新添加/更新的数据项
+        for item in page_info:
+            latest_update = max(latest_update, item[1])
+            item_num_cur_page += add_item(cursor, douban_group, item)
+        item_num += item_num_cur_page
 
-        for item in page_info:  # 遍历当前页中的每一条信息
-
-            if last_update > item[1]:  # 已经爬取到上次执行时的最新更新时间，退出
-                exit_flag = True
-                break
-            else:
-                num += 1
-                # 提供link查询当前信息是否已经存在，存在则更新，不存在则插入
-                cursor.execute(f"SELECT * FROM {douban_group} WHERE link=?", (item[2],))
-                row = cursor.fetchone()
-                if row:  # 存在则更新
-                    cursor.execute(
-                        f"UPDATE {douban_group} SET title=?, update_time=? WHERE link=?",
-                        (item[0], item[1], item[2]),
-                    )
-                else:  # 不存在则插入
-                    cursor.execute(
-                        f"INSERT INTO {douban_group} VALUES (?, ?, ?)",
-                        (item[0], item[1], item[2]),
-                    )
-        if exit_flag:
+        if item_num_cur_page == 0:
             break
 
     rent_info.commit()
     cursor.close()
     rent_info.close()
 
-    print("\n本次爬取结束，共爬取", page, "页", num, "条信息\n")
+    print("\n本次爬取结束，共爬取", page, "页", item_num, "条信息\n")
     print(f"从{last_update}更新至{latest_update}\n")
 
     db_name = "rent_info.db"  # 数据库名
     table_name = "beijingzufang"  # 豆瓣小组
-    xls_write(db_name, table_name)
+    if item_num > 0:  # 数据库有新数据加入才更新表格
+        xls_write(db_name, table_name)
 
     print("数据筛选并导出成功\n")
     print("执行完毕，时间：", datetime.strftime(local_time(), "%Y-%m-%d %H:%M:%S"))
