@@ -25,7 +25,7 @@ def crawl_page(douban_group, page):
     for i in range(len(items_raw)):
         item = items_raw[i]
         item = re.sub(" +", " ", item.replace("\n", " "))
-        link_title = re.findall(r"<a href=\"(.*?)title=\"(.*?)\"", item)
+        link_title = re.findall(r"<a href=\"(.*?)\"\s+title=\"(.*?)\"", item)
         update = re.findall(r"class=\"time\">(.*?)<\/td>", item)
         page_info.append([link_title[0][1], update[0], link_title[0][0]])
 
@@ -63,7 +63,7 @@ def xls_write(db_name, table_name):
     worksheet.activate()
     # 按照实际格式调整
     worksheet.set_column("A:A", 75)
-    worksheet.set_column("B:B", 15)
+    worksheet.set_column("B:B", 13)
     worksheet.set_column("C:C", 50)
     sheet_title = ["标题", "最新回复时间", "链接"]
 

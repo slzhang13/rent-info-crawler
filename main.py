@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     ## 一直爬取到上次执行时的最新更新时间
     max_page = 20  # 每次爬取的最大页数（4h执行一次，20页足够包含4h内的更新）
-    latest_update = ""
+    latest_update = last_update
     item_num = 0
 
     print("开始爬取...")
