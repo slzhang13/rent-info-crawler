@@ -72,7 +72,7 @@ if __name__ == "__main__":
         )
 
     ## 一直爬取到上次执行时的最新更新时间
-    max_page = 50  # 每次爬取的最大页数
+    max_page = 100  # 每次爬取的最大页数
     latest_update = last_update
     item_num = 0
 
