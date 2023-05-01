@@ -50,33 +50,29 @@ def filt_item(title):
     return True if "求租" not in title else False  # 排除求租信息
 
 
-def xls_write(db_name, table_name):
-    ## 读取数据库
-    rows = db_read(db_name, table_name)  # 已排序
-
-    ## 筛选并写入xlsx
-    filename = f"rent_info_{table_name}.xlsx"
+def xls_write(db_name, douban_groups):
+    filename = "douban_rent_info.xlsx"
     workbook = xw.Workbook(filename)
-    worksheet = workbook.add_worksheet("sheet1")
-    worksheet.activate()
-    # 按照实际格式调整
-    worksheet.set_column("A:A", 75)
-    worksheet.set_column("B:B", 13)
-    worksheet.set_column("C:C", 50)
-    sheet_title = ["标题", "最新回复时间", "链接"]
 
-    worksheet.write_row("A1", sheet_title)
+    for group_id, group_name in douban_groups:
+        ## 读取数据库
+        rows = db_read(db_name, group_id)  # 已排序
 
-    for i, row in enumerate(rows):
-        title = row[0]
-        if filt_item(title):
-            idx = "A" + str(i + 2)
-            worksheet.write_row(idx, row)
+        ## 筛选并写入xlsx
+        worksheet = workbook.add_worksheet(group_name)
+        worksheet.activate()
+        # 按照实际格式调整
+        worksheet.set_column("A:A", 75)
+        worksheet.set_column("B:B", 13)
+        worksheet.set_column("C:C", 50)
+        sheet_title = ["标题", "最新回复时间", "链接"]
+
+        worksheet.write_row("A1", sheet_title)
+
+        for i, row in enumerate(rows):
+            title = row[0]
+            if filt_item(title):
+                idx = "A" + str(i + 2)
+                worksheet.write_row(idx, row)
 
     workbook.close()
-
-
-if __name__ == "__main__":
-    db_name = "rent_info.db"
-    table_name = "beijingzufang"  # 豆瓣小组
-    xls_write(db_name, table_name)
