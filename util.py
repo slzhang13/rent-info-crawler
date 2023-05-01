@@ -6,10 +6,11 @@ import xlsxwriter as xw
 
 
 # 爬取豆瓣小组某一页的信息
-def crawl_page(douban_group, page):
+def crawl_page(douban_group, page, cookie=None):
     url = f"https://www.douban.com/group/{douban_group}/discussion?start={25*(page-1)}&type=new"
 
-    cookie = os.environ.get("COOKIE")  # get from repository secrets
+    if cookie is None:
+        cookie = os.environ.get("COOKIE")  # get from repository secrets
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
         "Cookie": cookie,
@@ -56,7 +57,8 @@ def xls_write(db_name, douban_groups):
 
     for group_id, group_name in douban_groups:
         ## 读取数据库
-        rows = db_read(db_name, group_id)  # 已排序
+        table_name = group_id if group_id[0].isalpha() else "group_" + group_id
+        rows = db_read(db_name, table_name)  # 已排序
 
         ## 筛选并写入xlsx
         worksheet = workbook.add_worksheet(group_name)
@@ -69,10 +71,12 @@ def xls_write(db_name, douban_groups):
 
         worksheet.write_row("A1", sheet_title)
 
+        cnt = 0
         for i, row in enumerate(rows):
             title = row[0]
             if filt_item(title):
-                idx = "A" + str(i + 2)
+                idx = "A" + str(cnt + 2)
                 worksheet.write_row(idx, row)
+                cnt += 1
 
     workbook.close()
