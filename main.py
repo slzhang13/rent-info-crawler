@@ -102,7 +102,7 @@ def crawl_group(group_id, group_name, cookie=None):
     cursor.close()
     rent_info.close()
 
-    print(f"\n小组【{group_name}】爬取结束，共爬取", page, "页", item_num, "条信息\n")
+    print(f"\n小组【{group_name}】爬取结束，共爬取", page - 1, "页", item_num, "条信息\n")
     print(f"从{last_update}更新至{latest_update}\n")
     print("执行完毕，时间：", datetime.strftime(local_time(), "%Y-%m-%d %H:%M:%S"))
     print("=========================================================\n")
