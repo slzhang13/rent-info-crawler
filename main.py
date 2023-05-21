@@ -68,7 +68,7 @@ def crawl_group(group_id, group_name, cookie=None):
         last_update = cursor.fetchone()[1]
     except:  # 当数据表是初次建立时，从4小时前开始爬取
         last_update = datetime.strftime(
-            local_time() - timedelta(minutes=30), "%m-%d %H:%M"
+            local_time() - timedelta(hours=4), "%m-%d %H:%M"
         )
 
     ## 一直爬取到上次执行时的最新更新时间

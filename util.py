@@ -47,6 +47,8 @@ def db_read(db_name, table_name, order_by="update_time", order="DESC"):
 
 # 筛选13号线, 16号线沿线独卫房源
 def filt_item(title):
+    if "求租" in title:
+        return False
     if "独卫" not in title:
         return False
     keywords = [
