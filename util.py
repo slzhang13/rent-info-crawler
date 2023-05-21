@@ -78,30 +78,26 @@ def xls_write(db_name, douban_groups):
     filename2 = "filtered_rent_info.xlsx"
     workbook2 = xw.Workbook(filename2)
 
-    worksheet2 = workbook2.add_worksheet()
-    worksheet2.activate()
-    worksheet2.set_column("A:A", 75)
-    worksheet2.set_column("B:B", 13)
-    worksheet2.set_column("C:C", 50)
-    worksheet2.write_row("A1", sheet_title)
-
-    cnt = 0
-
     for group_id, group_name in douban_groups:
         ## 读取数据库
         table_name = group_id if group_id[0].isalpha() else "group_" + group_id
         rows = db_read(db_name, table_name)  # 已排序
 
-        ## 筛选并写入xlsx
         worksheet1 = workbook1.add_worksheet(group_name)
         worksheet1.activate()
-        # 按照实际格式调整
         worksheet1.set_column("A:A", 75)
         worksheet1.set_column("B:B", 13)
         worksheet1.set_column("C:C", 50)
-
         worksheet1.write_row("A1", sheet_title)
 
+        worksheet2 = workbook2.add_worksheet(group_name)
+        worksheet2.activate()
+        worksheet2.set_column("A:A", 75)
+        worksheet2.set_column("B:B", 13)
+        worksheet2.set_column("C:C", 50)
+        worksheet2.write_row("A1", sheet_title)
+
+        cnt = 0
         for i, row in enumerate(rows):
             title = row[0]
             idx = "A" + str(i + 2)
