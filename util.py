@@ -45,15 +45,47 @@ def db_read(db_name, table_name, order_by="update_time", order="DESC"):
     return rows
 
 
-# 按关键字对标题筛选
+# 筛选13号线, 16号线沿线独卫房源
 def filt_item(title):
-    # need further definition
-    return True if "求租" not in title else False  # 排除求租信息
+    if "独卫" not in title:
+        return False
+    keywords = [
+        "北安河",
+        "温阳路",
+        "稻香湖路",
+        "屯佃",
+        "永丰",
+        "永丰南",
+        "西北旺",
+        "马连洼",
+        "农大",
+        "西二旗",
+        "清河",
+        "上地",
+    ]
+    for keyword in keywords:
+        if keyword in title:
+            return True
+    return False
 
 
 def xls_write(db_name, douban_groups):
-    filename = "douban_rent_info.xlsx"
-    workbook = xw.Workbook(filename)
+    sheet_title = ["标题", "最新回复时间", "链接"]
+
+    filename1 = "douban_rent_info.xlsx"
+    workbook1 = xw.Workbook(filename1)
+
+    filename2 = "filtered_rent_info.xlsx"
+    workbook2 = xw.Workbook(filename2)
+
+    worksheet2 = workbook2.add_worksheet()
+    worksheet2.activate()
+    worksheet2.set_column("A:A", 75)
+    worksheet2.set_column("B:B", 13)
+    worksheet2.set_column("C:C", 50)
+    worksheet2.write_row("A1", sheet_title)
+
+    cnt = 0
 
     for group_id, group_name in douban_groups:
         ## 读取数据库
@@ -61,22 +93,24 @@ def xls_write(db_name, douban_groups):
         rows = db_read(db_name, table_name)  # 已排序
 
         ## 筛选并写入xlsx
-        worksheet = workbook.add_worksheet(group_name)
-        worksheet.activate()
+        worksheet1 = workbook1.add_worksheet(group_name)
+        worksheet1.activate()
         # 按照实际格式调整
-        worksheet.set_column("A:A", 75)
-        worksheet.set_column("B:B", 13)
-        worksheet.set_column("C:C", 50)
-        sheet_title = ["标题", "最新回复时间", "链接"]
+        worksheet1.set_column("A:A", 75)
+        worksheet1.set_column("B:B", 13)
+        worksheet1.set_column("C:C", 50)
 
-        worksheet.write_row("A1", sheet_title)
+        worksheet1.write_row("A1", sheet_title)
 
-        cnt = 0
         for i, row in enumerate(rows):
             title = row[0]
+            idx = "A" + str(i + 2)
+            worksheet1.write_row(idx, row)
+
             if filt_item(title):
                 idx = "A" + str(cnt + 2)
-                worksheet.write_row(idx, row)
+                worksheet2.write_row(idx, row)
                 cnt += 1
 
-    workbook.close()
+    workbook1.close()
+    workbook2.close()

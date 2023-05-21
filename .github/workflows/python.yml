@@ -2,6 +2,9 @@ name: 豆瓣北京租房小组信息爬取
 
 on:
   schedule:
+    - push:
+        branches:
+          - main
     - cron: "0 0,2,4,6,8,10,12,14,16,18,20,22 * * *"
 
 jobs:
